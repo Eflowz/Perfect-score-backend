@@ -1,0 +1,52 @@
+{
+  "name": "perfect-score-backend",
+  "version": "1.0.0",
+  "description": "Perfect Score Tech Learning & Certification Platform Backend",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.4",
+    "@prisma/client": "^5.15.0",
+    "awilix": "^10.0.1",
+    "bcrypt": "^5.1.1",
+    "bullmq": "^5.8.3",
+    "dotenv": "^16.4.5",
+    "graphql": "^16.8.2",
+    "graphql-yoga": "^5.3.0",
+    "hono": "^4.4.2",
+    "ioredis": "^5.4.1",
+    "jose": "^5.4.0",
+    "node-cron": "^3.0.3",
+    "pino": "^9.2.0",
+    "ws": "^8.17.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^20.14.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/supertest": "^6.0.2",
+    "@types/ws": "^8.5.10",
+    "eslint": "^8.57.0",
+    "ioredis-mock": "^8.9.0",
+    "pino-pretty": "^11.2.0",
+    "postcss": "^8.4.38",
+    "prettier": "^3.3.1",
+    "prisma": "^5.15.0",
+    "supertest": "^7.0.0",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

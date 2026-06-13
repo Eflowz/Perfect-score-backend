@@ -1,0 +1,134 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  USER
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  REVIEWING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          UserRole  @default(USER)
+  xp            Int       @default(0)
+  level         Int       @default(1)
+  streakDays    Int       @default(0)
+  lastActiveAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  roadmap       Roadmap?
+  submissions   Submission[]
+  certificates  Certificate[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Course {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  level       CourseLevel
+  order       Int
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  modules     CourseModule[]
+  roadmaps    RoadmapCourse[]
+  submissions Submission[]
+}
+
+model CourseModule {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   // Markdown/rich text
+  order     Int
+  createdAt DateTime @default(now())
+  
+  @@index([courseId])
+}
+
+
+model Roadmap {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetDate      DateTime?
+  generatedAt     DateTime @default(now())
+  
+  courses         RoadmapCourse[]
+}
+
+model RoadmapCourse {
+  id          String       @id @default(cuid())
+  roadmapId   String
+  roadmap     Roadmap      @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course       @relation(fields: [courseId], references: [id])
+  order       Int
+  status      String       @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  startedAt   DateTime?
+  completedAt DateTime?
+}
+
+model Submission {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id])
+  courseId      String
+  course        Course           @relation(fields: [courseId], references: [id])
+  code          String           // The submitted code
+  language      String           @default("python")
+  status        SubmissionStatus @default(SUBMITTED)
+  aiReview      Json?            // AI review response stored as JSON
+  score         Float?
+  submittedAt   DateTime         @default(now())
+  reviewedAt    DateTime?
+  
+  @@index([userId, courseId])
+}
+
+model Certificate {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  courseId    String
+  title       String
+  issuedAt    DateTime @default(now())
+  credentialId String  @unique // Verifiable credential ID
+  pdfUrl      String?
+
+  @@index([userId])
+}
