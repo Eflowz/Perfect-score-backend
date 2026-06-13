@@ -1,5 +1,6 @@
 # Stage 1: Build
 FROM node:22-alpine AS builder
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -9,6 +10,7 @@ RUN npm run build
 
 # Stage 2: Production Runtime
 FROM node:22-alpine
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
