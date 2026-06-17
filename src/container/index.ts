@@ -18,6 +18,7 @@ import { RoadmapService } from '../modules/roadmap/roadmap.service.js';
 import { SubmissionsService } from '../modules/submissions/submissions.service.js';
 import { CertificationsService } from '../modules/certifications/certifications.service.js';
 import { IDEService } from '../modules/ide/ide.service.js';
+import { DashboardService } from '../modules/dashboard/dashboard.service.js';
 
 // Controllers
 import { AuthController } from '../modules/auth/auth.controller.js';
@@ -27,6 +28,7 @@ import { RoadmapController } from '../modules/roadmap/roadmap.controller.js';
 import { SubmissionsController } from '../modules/submissions/submissions.controller.js';
 import { CertificationsController } from '../modules/certifications/certifications.controller.js';
 import { IDEController } from '../modules/ide/ide.controller.js';
+import { DashboardController } from '../modules/dashboard/dashboard.controller.js';
 
 export interface ContainerCradle {
   prisma: typeof prisma;
@@ -46,6 +48,7 @@ export interface ContainerCradle {
   submissionsService: SubmissionsService;
   certificationsService: CertificationsService;
   ideService: IDEService;
+  dashboardService: DashboardService;
 
   authController: AuthController;
   usersController: UsersController;
@@ -54,6 +57,7 @@ export interface ContainerCradle {
   submissionsController: SubmissionsController;
   certificationsController: CertificationsController;
   ideController: IDEController;
+  dashboardController: DashboardController;
 }
 
 export type Container = AwilixContainer<ContainerCradle>;
@@ -83,6 +87,7 @@ export function createDIContainer(): Container {
     submissionsService: asClass(SubmissionsService).singleton(),
     certificationsService: asClass(CertificationsService).singleton(),
     ideService: asClass(IDEService).singleton(),
+    dashboardService: asClass(DashboardService).singleton(),
 
     // Controllers
     authController: asClass(AuthController).singleton(),
@@ -92,6 +97,7 @@ export function createDIContainer(): Container {
     submissionsController: asClass(SubmissionsController).singleton(),
     certificationsController: asClass(CertificationsController).singleton(),
     ideController: asClass(IDEController).singleton(),
+    dashboardController: asClass(DashboardController).singleton(),
   });
 
   return container;

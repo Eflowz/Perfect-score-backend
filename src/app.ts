@@ -16,6 +16,7 @@ import roadmapRouter from './modules/roadmap/roadmap.routes.js';
 import submissionsRouter from './modules/submissions/submissions.routes.js';
 import certificationsRouter from './modules/certifications/certifications.routes.js';
 import ideRouter from './modules/ide/ide.routes.js';
+import dashboardRouter from './modules/dashboard/dashboard.routes.js';
 
 export function createApp(container: Container) {
   const app = new Hono();
@@ -39,6 +40,7 @@ export function createApp(container: Container) {
   app.route('/api/v1/submissions', submissionsRouter);
   app.route('/api/v1/certifications', certificationsRouter);
   app.route('/api/v1/ide', ideRouter);
+  app.route('/api/v1/dashboard', dashboardRouter);
 
   const yoga = createYoga({
     schema,

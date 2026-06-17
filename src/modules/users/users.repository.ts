@@ -23,6 +23,7 @@ export class UsersRepository {
           },
         },
         certificates: true,
+        submissions: true,
       },
     });
   }

@@ -18,7 +18,10 @@ export class UsersService {
     if (!user) {
       throw new NotFoundError('User not found');
     }
-    const { passwordHash, ...safeUser } = user as any;
+    const { passwordHash, submissions, ...safeUser } = user as any;
+    safeUser.completedLessons = submissions
+      ? submissions.filter((s: any) => s.status === 'COMPLETED').length
+      : 0;
     return safeUser;
   }
 
@@ -27,9 +30,8 @@ export class UsersService {
     if (!user) {
       throw new NotFoundError('User not found');
     }
-    const updated = await this.usersRepository.update(userId, input);
-    const { passwordHash, ...safeUser } = updated as any;
-    return safeUser;
+    await this.usersRepository.update(userId, input);
+    return this.getProfile(userId);
   }
 
   async trackStreak(userId: string) {

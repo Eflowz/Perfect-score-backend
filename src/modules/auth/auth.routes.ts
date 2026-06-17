@@ -3,8 +3,14 @@ import { validateBody } from '../../middleware/validate.js';
 import { requireAuth } from '../../middleware/auth.js';
 import { registerSchema, loginSchema } from './auth.schema.js';
 import { AuthController } from './auth.controller.js';
+import { UsersController } from '../users/users.controller.js';
 
 const router = new Hono();
+
+router.get('/me', requireAuth, async (c) => {
+  const controller = c.get('container').resolve<UsersController>('usersController');
+  return controller.getMe(c);
+});
 
 router.post('/register', validateBody(registerSchema), async (c) => {
   const controller = c.get('container').resolve<AuthController>('authController');
