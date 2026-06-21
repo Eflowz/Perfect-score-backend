@@ -72,6 +72,56 @@ const mockPrisma = {
     findMany: vi.fn(),
     create: vi.fn(),
   },
+  userProgress: {
+    findUnique: vi.fn(),
+    upsert: vi.fn(),
+    findMany: vi.fn(),
+  },
+  quiz: {
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    upsert: vi.fn(),
+  },
+  userQuizResult: {
+    create: vi.fn(),
+    findMany: vi.fn(),
+  },
+  discussion: {
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    create: vi.fn(),
+  },
+  discussionReply: {
+    create: vi.fn(),
+  },
+  bookmark: {
+    upsert: vi.fn(),
+    delete: vi.fn(),
+    findMany: vi.fn(),
+  },
+  notification: {
+    findMany: vi.fn(),
+    updateMany: vi.fn(),
+    deleteMany: vi.fn(),
+    create: vi.fn(),
+  },
+  courseEnrollment: {
+    upsert: vi.fn(),
+    delete: vi.fn(),
+    findMany: vi.fn(),
+  },
+  achievement: {
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    upsert: vi.fn(),
+  },
+  userAchievement: {
+    findMany: vi.fn(),
+    upsert: vi.fn(),
+  },
 };
 
 vi.mock('../src/config/prisma.js', () => {

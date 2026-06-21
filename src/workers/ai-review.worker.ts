@@ -77,6 +77,16 @@ export const aiReviewWorker = new Worker(
     });
 
     if (finalStatus === SubmissionStatus.COMPLETED) {
+      const user = await prisma.user.findUnique({ where: { id: submission.userId } });
+      if (user) {
+        const newXp = user.xp + 50;
+        const newLevel = Math.max(1, Math.floor(newXp / 1000) + 1);
+        await prisma.user.update({
+          where: { id: submission.userId },
+          data: { xp: newXp, level: newLevel },
+        });
+      }
+
       await certificateQueue.add(`cert-${submissionId}`, {
         userId: submission.userId,
         courseId: submission.courseId,

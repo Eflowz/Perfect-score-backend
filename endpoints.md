@@ -573,11 +573,500 @@ All API routes are prefixed with `/api/v1` and are hosted on the live server.
       "subtext": "9 days remaining",
       "progressValue": 82
     },
-    "liveSessions": {
-      "title": "Office Hours",
-      "value": "Live Now",
-      "subtext": "Join interactive Q&A",
-      "isLive": true
+        "isLive": true
     }
   }
   ```
+
+---
+
+## 📈 User Progress Tracking (`/api/v1/progress`)
+
+### 1. Complete a Module
+* **Method:** `POST`
+* **Endpoint:** `/api/v1/progress/module/:moduleId/complete`
+* **Headers:** 
+  * `Authorization: Bearer <accessToken>`
+  * `Content-Type: application/json`
+* **Request Body:**
+  ```json
+  {
+    "timeSpent": 120
+  }
+  ```
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": {
+      "id": "cuid-progress-1",
+      "userId": "cuid-user-1",
+      "courseId": "cuid-course-1",
+      "moduleId": "cuid-module-1",
+      "completed": true,
+      "lastAccessed": "2026-06-19T12:00:00.000Z",
+      "timeSpent": 120
+    }
+  }
+  ```
+
+### 2. Get Progress for a Course
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/progress/course/:courseId`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-progress-1",
+        "userId": "cuid-user-1",
+        "courseId": "cuid-course-1",
+        "moduleId": "cuid-module-1",
+        "completed": true,
+        "lastAccessed": "2026-06-19T12:00:00.000Z",
+        "timeSpent": 120,
+        "module": {
+          "id": "cuid-module-1",
+          "title": "Variables and Types"
+        }
+      }
+    ]
+  }
+  ```
+
+### 3. Get All User Progress
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/progress/user`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-progress-1",
+        "userId": "cuid-user-1",
+        "courseId": "cuid-course-1",
+        "moduleId": "cuid-module-1",
+        "completed": true,
+        "lastAccessed": "2026-06-19T12:00:00.000Z",
+        "timeSpent": 120,
+        "course": {
+          "id": "cuid-course-1",
+          "title": "Introduction to Python"
+        },
+        "module": {
+          "id": "cuid-module-1",
+          "title": "Variables and Types"
+        }
+      }
+    ]
+  }
+  ```
+
+---
+
+## 🧠 Quizzes & Assessments (`/api/v1`)
+
+### 1. List Course Quizzes
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/courses/:id/quizzes`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-quiz-1",
+        "courseId": "cuid-course-1",
+        "moduleId": "cuid-module-1",
+        "title": "Python Basics Quiz",
+        "passingScore": 70,
+        "timeLimit": 10
+      }
+    ]
+  }
+  ```
+
+### 2. Create Quiz (Admin Only)
+* **Method:** `POST`
+* **Endpoint:** `/api/v1/courses/:id/quizzes`
+* **Headers:** 
+  * `Authorization: Bearer <adminAccessToken>`
+  * `Content-Type: application/json`
+* **Request Body:**
+  ```json
+  {
+    "moduleId": "cuid-module-1",
+    "title": "Python Basics Quiz",
+    "passingScore": 70,
+    "timeLimit": 10,
+    "questions": [
+      {
+        "type": "multiple-choice",
+        "question": "What is Python?",
+        "options": ["Language", "Snake", "Framework"],
+        "correctAnswer": "Language",
+        "explanation": "Python is a high-level general-purpose programming language.",
+        "points": 10
+      }
+    ]
+  }
+  ```
+* **Success Response (201 Created):**
+  ```json
+  {
+    "data": {
+      "id": "cuid-quiz-1",
+      "courseId": "cuid-course-1",
+      "moduleId": "cuid-module-1",
+      "title": "Python Basics Quiz",
+      "passingScore": 70,
+      "timeLimit": 10,
+      "questions": [...]
+    }
+  }
+  ```
+
+### 3. Get Specific Quiz
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/quizzes/:id`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": {
+      "id": "cuid-quiz-1",
+      "courseId": "cuid-course-1",
+      "moduleId": "cuid-module-1",
+      "title": "Python Basics Quiz",
+      "passingScore": 70,
+      "timeLimit": 10,
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "What is Python?",
+          "options": ["Language", "Snake", "Framework"],
+          "correctAnswer": "Language",
+          "explanation": "Python is a high-level general-purpose programming language.",
+          "points": 10
+        }
+      ]
+    }
+  }
+  ```
+
+### 4. Submit Quiz Answers
+* **Method:** `POST`
+* **Endpoint:** `/api/v1/quizzes/:id/submit`
+* **Headers:** 
+  * `Authorization: Bearer <accessToken>`
+  * `Content-Type: application/json`
+* **Request Body:**
+  ```json
+  {
+    "answers": ["Language"]
+  }
+  ```
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": {
+      "result": {
+        "id": "cuid-result-1",
+        "userId": "cuid-user-1",
+        "quizId": "cuid-quiz-1",
+        "score": 100,
+        "answers": ["Language"],
+        "completedAt": "2026-06-19T12:00:00.000Z"
+      },
+      "passed": true,
+      "score": 100,
+      "earnedPoints": 10,
+      "totalPoints": 10,
+      "xpAwarded": 20
+    }
+  }
+  ```
+
+---
+
+## 💬 Comments & Discussions (`/api/v1`)
+
+### 1. List Discussions for a Course
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/courses/:courseId/discussions`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-discussion-1",
+        "courseId": "cuid-course-1",
+        "userId": "cuid-user-1",
+        "title": "How to install libraries?",
+        "content": "Can someone explain how pip works?",
+        "createdAt": "2026-06-19T12:00:00.000Z",
+        "user": {
+          "id": "cuid-user-1",
+          "name": "John Doe",
+          "email": "johndoe@example.com"
+        },
+        "replies": [
+          {
+            "id": "cuid-reply-1",
+            "content": "You run: pip install package_name",
+            "createdAt": "2026-06-19T12:05:00.000Z",
+            "user": {
+              "id": "cuid-user-2",
+              "name": "Jane Smith"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+### 2. Post a New Discussion
+* **Method:** `POST`
+* **Endpoint:** `/api/v1/courses/:courseId/discussions`
+* **Headers:** 
+  * `Authorization: Bearer <accessToken>`
+  * `Content-Type: application/json`
+* **Request Body:**
+  ```json
+  {
+    "title": "How to install libraries?",
+    "content": "Can someone explain how pip works?"
+  }
+  ```
+* **Success Response (201 Created):**
+  ```json
+  {
+    "data": {
+      "id": "cuid-discussion-1",
+      "courseId": "cuid-course-1",
+      "userId": "cuid-user-1",
+      "title": "How to install libraries?",
+      "content": "Can someone explain how pip works?",
+      "createdAt": "2026-06-19T12:00:00.000Z"
+    }
+  }
+  ```
+
+### 3. Reply to a Discussion
+* **Method:** `POST`
+* **Endpoint:** `/api/v1/discussions/:id/replies`
+* **Headers:** 
+  * `Authorization: Bearer <accessToken>`
+  * `Content-Type: application/json`
+* **Request Body:**
+  ```json
+  {
+    "content": "You run: pip install package_name"
+  }
+  ```
+* **Success Response (201 Created):**
+  ```json
+  {
+    "data": {
+      "id": "cuid-reply-1",
+      "discussionId": "cuid-discussion-1",
+      "userId": "cuid-user-2",
+      "content": "You run: pip install package_name",
+      "createdAt": "2026-06-19T12:05:00.000Z"
+    }
+  }
+  ```
+
+---
+
+## 🔖 Bookmarks & Save (`/api/v1/users/bookmarks`)
+
+### 1. Bookmark a Course
+* **Method:** `POST`
+* **Endpoint:** `/api/v1/users/bookmarks/course/:courseId`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (201 Created):**
+  ```json
+  {
+    "data": {
+      "id": "cuid-bookmark-1",
+      "userId": "cuid-user-1",
+      "courseId": "cuid-course-1",
+      "createdAt": "2026-06-19T12:00:00.000Z"
+    }
+  }
+  ```
+
+### 2. Remove Course Bookmark
+* **Method:** `DELETE`
+* **Endpoint:** `/api/v1/users/bookmarks/course/:courseId`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "success": true
+  }
+  ```
+
+---
+
+## 🔍 Search (`/api/v1/search`)
+
+### 1. Search Courses or Modules
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/search?q=python&type=courses`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-course-1",
+        "title": "Introduction to Python",
+        "description": "Learn the basics of Python programming language."
+      }
+    ]
+  }
+  ```
+
+---
+
+## 🔔 Notifications (`/api/v1/notifications`)
+
+### 1. List Notifications
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/notifications`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-notif-1",
+        "userId": "cuid-user-1",
+        "title": "New Achievement!",
+        "message": "You earned the First Steps badge.",
+        "read": false,
+        "createdAt": "2026-06-19T12:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+### 2. Mark Notification as Read
+* **Method:** `PUT`
+* **Endpoint:** `/api/v1/notifications/:id/read`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "success": true
+  }
+  ```
+
+### 3. Delete Notification
+* **Method:** `DELETE`
+* **Endpoint:** `/api/v1/notifications/:id`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "success": true
+  }
+  ```
+
+---
+
+## 🎓 Course Enrollment (`/api/v1`)
+
+### 1. Enroll in a Course
+* **Method:** `POST`
+* **Endpoint:** `/api/v1/courses/:id/enroll`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (201 Created):**
+  ```json
+  {
+    "data": {
+      "id": "cuid-enroll-1",
+      "userId": "cuid-user-1",
+      "courseId": "cuid-course-1",
+      "enrolledAt": "2026-06-19T12:00:00.000Z"
+    }
+  }
+  ```
+
+### 2. Unenroll from a Course
+* **Method:** `DELETE`
+* **Endpoint:** `/api/v1/courses/:id/unenroll`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "success": true
+  }
+  ```
+
+### 3. List Enrolled Courses
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/users/enrolled-courses`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-course-1",
+        "title": "Introduction to Python",
+        "description": "Learn the basics of Python programming language.",
+        "modules": []
+      }
+    ]
+  }
+  ```
+
+---
+
+## 🏆 Achievements & Badges (`/api/v1`)
+
+### 1. Get My Badges
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/users/badges`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "cuid-award-1",
+        "title": "First Steps",
+        "description": "Completed your first learning module",
+        "badgeIcon": "footprints",
+        "xpReward": 100,
+        "awardedAt": "2026-06-19T12:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+### 2. Get All Achievements
+* **Method:** `GET`
+* **Endpoint:** `/api/v1/achievements`
+* **Headers:** `Authorization: Bearer <accessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "id": "first-steps",
+        "title": "First Steps",
+        "description": "Completed your first learning module",
+        "badgeIcon": "footprints",
+        "xpReward": 100
+      }
+    ]
+  }
+}
+

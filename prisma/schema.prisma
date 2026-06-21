@@ -43,6 +43,14 @@ model User {
   submissions   Submission[]
   certificates  Certificate[]
   refreshTokens RefreshToken[]
+  progress      UserProgress[]
+  quizResults   UserQuizResult[]
+  discussions   Discussion[]
+  replies       DiscussionReply[]
+  bookmarks     Bookmark[]
+  notifications Notification[]
+  enrollments   CourseEnrollment[]
+  achievements  UserAchievement[]
 }
 
 model RefreshToken {
@@ -67,6 +75,11 @@ model Course {
   modules     CourseModule[]
   roadmaps    RoadmapCourse[]
   submissions Submission[]
+  progress    UserProgress[]
+  quizzes     Quiz[]
+  discussions Discussion[]
+  bookmarks   Bookmark[]
+  enrollments CourseEnrollment[]
 }
 
 model CourseModule {
@@ -78,6 +91,9 @@ model CourseModule {
   order     Int
   createdAt DateTime @default(now())
   
+  progress  UserProgress[]
+  quiz      Quiz?
+
   @@index([courseId])
 }
 
@@ -132,4 +148,125 @@ model Certificate {
   pdfUrl      String?
 
   @@index([userId])
+}
+
+model UserProgress {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId     String
+  course       Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  moduleId     String
+  module       CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  completed    Boolean      @default(false)
+  lastAccessed DateTime     @default(now())
+  timeSpent    Int          @default(0) // In seconds
+
+  @@unique([userId, moduleId])
+  @@index([userId, courseId])
+}
+
+model Quiz {
+  id           String           @id @default(cuid())
+  courseId     String
+  course       Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  moduleId     String           @unique
+  module       CourseModule     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title        String
+  questions    Json             // Array of questions matching the schema
+  passingScore Int
+  timeLimit    Int              // in minutes
+  userResults  UserQuizResult[]
+}
+
+model UserQuizResult {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score       Float
+  answers     String[] // User submitted answers (strings)
+  completedAt DateTime @default(now())
+
+  @@index([userId, quizId])
+}
+
+model Discussion {
+  id        String            @id @default(cuid())
+  courseId  String
+  course    Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  replies   DiscussionReply[]
+
+  @@index([courseId])
+}
+
+model DiscussionReply {
+  id           String     @id @default(cuid())
+  discussionId String
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content      String
+  createdAt    DateTime   @default(now())
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model CourseEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  title       String
+  description String
+  badgeIcon   String
+  xpReward    Int               @default(0)
+  userAwards  UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  awardedAt     DateTime    @default(now())
+
+  @@unique([userId, achievementId])
 }

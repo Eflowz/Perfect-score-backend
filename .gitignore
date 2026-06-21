@@ -3,3 +3,5 @@ endpoints.node_modules
 .env
 .env.example
 dist
+
+contd.txt

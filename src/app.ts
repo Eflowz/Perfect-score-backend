@@ -17,6 +17,14 @@ import submissionsRouter from './modules/submissions/submissions.routes.js';
 import certificationsRouter from './modules/certifications/certifications.routes.js';
 import ideRouter from './modules/ide/ide.routes.js';
 import dashboardRouter from './modules/dashboard/dashboard.routes.js';
+import progressRouter from './modules/progress/progress.routes.js';
+import quizRouter from './modules/quiz/quiz.routes.js';
+import discussionsRouter from './modules/discussions/discussions.routes.js';
+import bookmarksRouter from './modules/bookmarks/bookmarks.routes.js';
+import searchRouter from './modules/search/search.routes.js';
+import notificationsRouter from './modules/notifications/notifications.routes.js';
+import enrollmentRouter from './modules/enrollment/enrollment.routes.js';
+import achievementsRouter from './modules/achievements/achievements.routes.js';
 
 export function createApp(container: Container) {
   const app = new Hono();
@@ -41,6 +49,16 @@ export function createApp(container: Container) {
   app.route('/api/v1/certifications', certificationsRouter);
   app.route('/api/v1/ide', ideRouter);
   app.route('/api/v1/dashboard', dashboardRouter);
+  
+  // Mixed root or custom mounted routers
+  app.route('/api/v1/progress', progressRouter);
+  app.route('/api/v1/users/bookmarks', bookmarksRouter);
+  app.route('/api/v1/search', searchRouter);
+  app.route('/api/v1/notifications', notificationsRouter);
+  app.route('/api/v1', quizRouter);
+  app.route('/api/v1', discussionsRouter);
+  app.route('/api/v1', enrollmentRouter);
+  app.route('/api/v1', achievementsRouter);
 
   const yoga = createYoga({
     schema,
