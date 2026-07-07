@@ -201,7 +201,7 @@ All API routes are prefixed with `/api/v1` and are hosted on the live server.
   ```
 
 ### 4. Update a Course (Admin Only)
-* **Method:** `PUT`
+* **Method:** `PUT`or `PATCH`
 * **Endpoint:** `/api/v1/courses/:id`
 * **Headers:** 
   * `Authorization: Bearer <adminAccessToken>`
@@ -258,6 +258,45 @@ All API routes are prefixed with `/api/v1` and are hosted on the live server.
     "content": "Learn about if statements and loops in Python.",
     "order": 2,
     "createdAt": "2026-06-13T14:35:00.000Z"
+  }
+  ```
+
+### 7. Update/Edit a Module (Admin Only)
+* **Method:** `PUT` or `PATCH`
+* **Endpoint:** `/api/v1/courses/:courseId/modules/:moduleId`
+* **Headers:** 
+  * `Authorization: Bearer <adminAccessToken>`
+  * `Content-Type: application/json`
+* **Request Body:**
+  ```json
+  {
+    "title": "Updated Title",
+    "content": "Updated HTML or Video URL link",
+    "order": 3
+  }
+  ```
+* **Success Response (200 OK):**
+  ```json
+  {
+    "id": "cuid-module-1",
+    "courseId": "cuid-course-1",
+    "title": "Updated Title",
+    "content": "Updated HTML or Video URL link",
+    "order": 3,
+    "updatedAt": "2026-07-07T01:13:00.000Z"
+  }
+  ```
+
+### 8. Delete a Module (Admin Only)
+* **Method:** `DELETE`
+* **Endpoint:** `/api/v1/courses/:courseId/modules/:moduleId`
+* **Headers:** 
+  * `Authorization: Bearer <adminAccessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "Module deleted successfully"
   }
   ```
 
@@ -615,23 +654,18 @@ All API routes are prefixed with `/api/v1` and are hosted on the live server.
 * **Headers:** `Authorization: Bearer <accessToken>`
 * **Success Response (200 OK):**
   ```json
-  {
-    "data": [
-      {
-        "id": "cuid-progress-1",
-        "userId": "cuid-user-1",
-        "courseId": "cuid-course-1",
-        "moduleId": "cuid-module-1",
-        "completed": true,
-        "lastAccessed": "2026-06-19T12:00:00.000Z",
-        "timeSpent": 120,
-        "module": {
-          "id": "cuid-module-1",
-          "title": "Variables and Types"
-        }
-      }
-    ]
-  }
+  [
+    {
+      "moduleId": "module-1",
+      "completed": true,
+      "timeSpent": 120
+    },
+    {
+      "moduleId": "module-2",
+      "completed": false,
+      "timeSpent": 0
+    }
+  ]
   ```
 
 ### 3. Get All User Progress
@@ -669,22 +703,20 @@ All API routes are prefixed with `/api/v1` and are hosted on the live server.
 
 ### 1. List Course Quizzes
 * **Method:** `GET`
-* **Endpoint:** `/api/v1/courses/:id/quizzes`
+* **Endpoint:** `/api/v1/courses/:courseId/quizzes`
 * **Headers:** `Authorization: Bearer <accessToken>`
 * **Success Response (200 OK):**
   ```json
-  {
-    "data": [
-      {
-        "id": "cuid-quiz-1",
-        "courseId": "cuid-course-1",
-        "moduleId": "cuid-module-1",
-        "title": "Python Basics Quiz",
-        "passingScore": 70,
-        "timeLimit": 10
-      }
-    ]
-  }
+  [
+    {
+      "id": "quiz-1",
+      "title": "Module Quiz",
+      "courseId": "course-1",
+      "moduleId": "module-1",
+      "passingScore": 70,
+      "timeLimit": 15
+    }
+  ]
   ```
 
 ### 2. Create Quiz (Admin Only)
@@ -734,24 +766,19 @@ All API routes are prefixed with `/api/v1` and are hosted on the live server.
 * **Success Response (200 OK):**
   ```json
   {
-    "data": {
-      "id": "cuid-quiz-1",
-      "courseId": "cuid-course-1",
-      "moduleId": "cuid-module-1",
-      "title": "Python Basics Quiz",
-      "passingScore": 70,
-      "timeLimit": 10,
-      "questions": [
-        {
-          "type": "multiple-choice",
-          "question": "What is Python?",
-          "options": ["Language", "Snake", "Framework"],
-          "correctAnswer": "Language",
-          "explanation": "Python is a high-level general-purpose programming language.",
-          "points": 10
-        }
-      ]
-    }
+    "id": "quiz-1",
+    "title": "Module Quiz",
+    "courseId": "course-1",
+    "moduleId": "module-1",
+    "questions": [
+      {
+        "id": "q1",
+        "question": "What is Python?",
+        "options": ["Language", "Snake", "Framework"],
+        "correctAnswer": "Language",
+        "explanation": "Python is a high-level programming language."
+      }
+    ]
   }
   ```
 
@@ -785,6 +812,68 @@ All API routes are prefixed with `/api/v1` and are hosted on the live server.
       "totalPoints": 10,
       "xpAwarded": 20
     }
+  }
+  ```
+
+### 5. Update/Edit a Quiz (Admin Only)
+* **Method:** `PUT` or `PATCH`
+* **Endpoint:** `/api/v1/quizzes/:id`
+* **Headers:** 
+  * `Authorization: Bearer <adminAccessToken>`
+  * `Content-Type: application/json`
+* **Request Body:**
+  ```json
+  {
+    "title": "Updated Quiz Title",
+    "passingScore": 80,
+    "timeLimit": 15,
+    "questions": [
+      {
+        "type": "multiple-choice",
+        "question": "What is Python?",
+        "options": ["Language", "Snake", "Framework"],
+        "correctAnswer": "Language",
+        "explanation": "Python is a high-level general-purpose programming language.",
+        "points": 10
+      }
+    ]
+  }
+  ```
+* **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "cuid-quiz-1",
+      "courseId": "cuid-course-1",
+      "moduleId": "cuid-module-1",
+      "title": "Updated Quiz Title",
+      "passingScore": 80,
+      "timeLimit": 15,
+      "questions": [
+        {
+          "type": "multiple-choice",
+          "question": "What is Python?",
+          "options": ["Language", "Snake", "Framework"],
+          "correctAnswer": "Language",
+          "explanation": "Python is a high-level general-purpose programming language.",
+          "points": 10
+        }
+      ]
+    }
+  }
+  ```
+
+### 6. Delete a Quiz (Admin Only)
+* **Method:** `DELETE`
+* **Endpoint:** `/api/v1/quizzes/:id`
+* **Headers:** 
+  * `Authorization: Bearer <adminAccessToken>`
+* **Success Response (200 OK):**
+  ```json
+  {
+    "success": true,
+    "message": "Quiz deleted successfully"
   }
   ```
 

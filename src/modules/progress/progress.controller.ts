@@ -24,7 +24,7 @@ export class ProgressController {
     const user = c.get('user')!;
     const courseId = c.req.param('courseId')!;
     const progress = await this.progressService.getProgressByCourse(user.id, courseId);
-    return c.json({ data: progress });
+    return c.json(progress);
   };
 
   getByUser = async (c: Context) => {

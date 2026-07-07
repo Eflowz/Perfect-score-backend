@@ -90,6 +90,7 @@ model CourseModule {
   content   String   // Markdown/rich text
   order     Int
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
   
   progress  UserProgress[]
   quiz      Quiz?

@@ -39,7 +39,21 @@ export class ProgressService {
     if (!course) {
       throw new NotFoundError('Course not found');
     }
-    return this.progressRepository.findByCourse(userId, courseId);
+    const modules = await this.prisma.courseModule.findMany({
+      where: { courseId },
+      orderBy: { order: 'asc' },
+    });
+    const progressRecords = await this.progressRepository.findByCourse(userId, courseId);
+    const progressMap = new Map(progressRecords.map((p) => [p.moduleId, p]));
+
+    return modules.map((m) => {
+      const prog = progressMap.get(m.id);
+      return {
+        moduleId: m.id,
+        completed: prog ? prog.completed : false,
+        timeSpent: prog ? prog.timeSpent : 0,
+      };
+    });
   }
 
   async getProgressByUser(userId: string) {

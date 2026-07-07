@@ -51,6 +51,7 @@ const mockPrisma = {
     findUnique: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    findMany: vi.fn(),
   },
   roadmap: {
     findUnique: vi.fn(),

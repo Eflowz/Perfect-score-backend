@@ -35,13 +35,13 @@ export class CoursesController {
     const id = c.req.param('id')!;
     const body = c.get('body');
     const course = await this.coursesService.updateCourse(id, body);
-    return c.json({ data: course });
+    return c.json(course);
   };
 
   delete = async (c: Context) => {
     const id = c.req.param('id')!;
     await this.coursesService.deleteCourse(id);
-    return c.json({ success: true });
+    return c.json({ success: true, message: 'Course deleted successfully' });
   };
 
   addModule = async (c: Context) => {
@@ -55,12 +55,12 @@ export class CoursesController {
     const moduleId = c.req.param('moduleId')!;
     const body = c.get('body');
     const mod = await this.coursesService.updateModule(moduleId, body);
-    return c.json({ data: mod });
+    return c.json(mod);
   };
 
   deleteModule = async (c: Context) => {
     const moduleId = c.req.param('moduleId')!;
     await this.coursesService.deleteModule(moduleId);
-    return c.json({ success: true });
+    return c.json({ success: true, message: 'Module deleted successfully' });
   };
 }

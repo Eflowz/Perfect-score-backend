@@ -163,4 +163,182 @@ describe('New Backend Features', () => {
     expect(res.status).toBe(200);
     expect(res.body.data[0].title).toBe('Welcome');
   });
+
+  describe('New Admin & Exercise Flow Endpoints', () => {
+    it('GET /api/v1/progress/course/:courseId - should return progress for all course modules', async () => {
+      const token = await generateTestToken('user-123', 'USER');
+      mockPrisma.course.findUnique.mockResolvedValueOnce({ id: 'course-1', title: 'Python Basics' });
+      mockPrisma.courseModule.findMany.mockResolvedValueOnce([
+        { id: 'module-1', courseId: 'course-1', order: 1, title: 'Mod 1', content: 'Cont' },
+        { id: 'module-2', courseId: 'course-1', order: 2, title: 'Mod 2', content: 'Cont' },
+      ]);
+      mockPrisma.userProgress.findMany.mockResolvedValueOnce([
+        { id: 'progress-1', userId: 'user-123', courseId: 'course-1', moduleId: 'module-1', completed: true, timeSpent: 120 },
+      ]);
+
+      const res = await request(handler)
+        .get('/api/v1/progress/course/course-1')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([
+        { moduleId: 'module-1', completed: true, timeSpent: 120 },
+        { moduleId: 'module-2', completed: false, timeSpent: 0 },
+      ]);
+    });
+
+    it('PUT /api/v1/courses/:courseId/modules/:moduleId - should update module and return it unwrapped', async () => {
+      const adminToken = await generateTestToken('admin-123', 'SUPER_ADMIN');
+      mockPrisma.courseModule.findUnique.mockResolvedValueOnce({ id: 'module-1', courseId: 'course-1' });
+      mockPrisma.courseModule.update.mockResolvedValueOnce({
+        id: 'module-1',
+        courseId: 'course-1',
+        title: 'Updated Title',
+        content: 'Updated HTML or Video URL link',
+        order: 3,
+        updatedAt: new Date(),
+      });
+
+      const res = await request(handler)
+        .put('/api/v1/courses/course-1/modules/module-1')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          title: 'Updated Title',
+          content: 'Updated HTML or Video URL link',
+          order: 3,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.title).toBe('Updated Title');
+      expect(res.body.content).toBe('Updated HTML or Video URL link');
+      expect(res.body.order).toBe(3);
+      expect(res.body.id).toBe('module-1');
+    });
+
+    it('PUT /api/v1/courses/:id - should update course title and description and return it unwrapped', async () => {
+      const adminToken = await generateTestToken('admin-123', 'SUPER_ADMIN');
+      mockPrisma.course.findUnique.mockResolvedValueOnce({ id: 'course-1', title: 'Python Basics' });
+      mockPrisma.course.update.mockResolvedValueOnce({
+        id: 'course-1',
+        title: 'Updated Course Title',
+        description: 'Updated course description for learners',
+        level: 'BEGINNER',
+        order: 1,
+        updatedAt: new Date(),
+      });
+
+      const res = await request(handler)
+        .put('/api/v1/courses/course-1')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          title: 'Updated Course Title',
+          description: 'Updated course description for learners',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.title).toBe('Updated Course Title');
+      expect(res.body.description).toBe('Updated course description for learners');
+      expect(res.body.id).toBe('course-1');
+    });
+
+    it('GET /api/v1/courses/:courseId/quizzes - should return course quizzes list unwrapped', async () => {
+      const token = await generateTestToken('user-123', 'USER');
+      mockPrisma.course.findUnique.mockResolvedValueOnce({ id: 'course-1', title: 'Python Basics' });
+      mockPrisma.quiz.findMany.mockResolvedValueOnce([
+        { id: 'quiz-1', title: 'Module Quiz', courseId: 'course-1', moduleId: 'module-1', passingScore: 70, timeLimit: 15 },
+      ]);
+
+      const res = await request(handler)
+        .get('/api/v1/courses/course-1/quizzes')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([
+        { id: 'quiz-1', title: 'Module Quiz', courseId: 'course-1', moduleId: 'module-1', passingScore: 70, timeLimit: 15 },
+      ]);
+    });
+
+    it('GET /api/v1/quizzes/:id - should return single quiz details unwrapped', async () => {
+      const token = await generateTestToken('user-123', 'USER');
+      mockPrisma.quiz.findUnique.mockResolvedValueOnce({
+        id: 'quiz-1',
+        title: 'Module Quiz',
+        courseId: 'course-1',
+        moduleId: 'module-1',
+        passingScore: 70,
+        timeLimit: 15,
+        questions: [
+          {
+            type: 'multiple-choice',
+            question: 'What is Python?',
+            options: ['Language', 'Snake'],
+            correctAnswer: 'Language',
+            explanation: 'Python is a high-level programming language.',
+            points: 10,
+          },
+        ],
+      });
+
+      const res = await request(handler)
+        .get('/api/v1/quizzes/quiz-1')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.title).toBe('Module Quiz');
+      expect(res.body.questions).toHaveLength(1);
+      expect(res.body.questions[0].correctAnswer).toBe('Language');
+    });
+
+    it('PUT /api/v1/quizzes/:id - should update quiz and return wrapped inside success and data', async () => {
+      const adminToken = await generateTestToken('admin-123', 'SUPER_ADMIN');
+      mockPrisma.quiz.findUnique.mockResolvedValueOnce({ id: 'quiz-1', title: 'Module Quiz' });
+      mockPrisma.quiz.update.mockResolvedValueOnce({
+        id: 'quiz-1',
+        courseId: 'course-1',
+        moduleId: 'module-1',
+        title: 'Updated Quiz Title',
+        passingScore: 80,
+        timeLimit: 15,
+        questions: [],
+      });
+
+      const res = await request(handler)
+        .put('/api/v1/quizzes/quiz-1')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          title: 'Updated Quiz Title',
+          passingScore: 80,
+          timeLimit: 15,
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: 'What is Python?',
+              options: ['Language', 'Snake', 'Framework'],
+              correctAnswer: 'Language',
+              explanation: 'Python is a high-level general-purpose programming language.',
+              points: 10,
+            },
+          ],
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.title).toBe('Updated Quiz Title');
+      expect(res.body.data.passingScore).toBe(80);
+    });
+
+    it('DELETE /api/v1/quizzes/:id - should delete quiz and return custom success message', async () => {
+      const adminToken = await generateTestToken('admin-123', 'SUPER_ADMIN');
+      mockPrisma.quiz.findUnique.mockResolvedValueOnce({ id: 'quiz-1', title: 'Module Quiz' });
+      mockPrisma.quiz.delete.mockResolvedValueOnce({ id: 'quiz-1' });
+
+      const res = await request(handler)
+        .delete('/api/v1/quizzes/quiz-1')
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.message).toBe('Quiz deleted successfully');
+    });
+  });
 });

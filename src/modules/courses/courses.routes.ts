@@ -24,6 +24,11 @@ router.post('/', requireAuth, requireRole(UserRole.SUPER_ADMIN), validateBody(cr
   return controller.create(c);
 });
 
+router.put('/:id', requireAuth, requireRole(UserRole.SUPER_ADMIN), validateBody(updateCourseSchema), async (c) => {
+  const controller = c.get('container').resolve<CoursesController>('coursesController');
+  return controller.update(c);
+});
+
 router.patch('/:id', requireAuth, requireRole(UserRole.SUPER_ADMIN), validateBody(updateCourseSchema), async (c) => {
   const controller = c.get('container').resolve<CoursesController>('coursesController');
   return controller.update(c);
@@ -40,12 +45,29 @@ router.post('/:courseId/modules', requireAuth, requireRole(UserRole.SUPER_ADMIN)
   return controller.addModule(c);
 });
 
+// Legacy paths
 router.patch('/modules/:moduleId', requireAuth, requireRole(UserRole.SUPER_ADMIN), validateBody(createModuleSchema.partial()), async (c) => {
   const controller = c.get('container').resolve<CoursesController>('coursesController');
   return controller.updateModule(c);
 });
 
 router.delete('/modules/:moduleId', requireAuth, requireRole(UserRole.SUPER_ADMIN), async (c) => {
+  const controller = c.get('container').resolve<CoursesController>('coursesController');
+  return controller.deleteModule(c);
+});
+
+// Recommended nested paths
+router.put('/:courseId/modules/:moduleId', requireAuth, requireRole(UserRole.SUPER_ADMIN), validateBody(createModuleSchema.partial()), async (c) => {
+  const controller = c.get('container').resolve<CoursesController>('coursesController');
+  return controller.updateModule(c);
+});
+
+router.patch('/:courseId/modules/:moduleId', requireAuth, requireRole(UserRole.SUPER_ADMIN), validateBody(createModuleSchema.partial()), async (c) => {
+  const controller = c.get('container').resolve<CoursesController>('coursesController');
+  return controller.updateModule(c);
+});
+
+router.delete('/:courseId/modules/:moduleId', requireAuth, requireRole(UserRole.SUPER_ADMIN), async (c) => {
   const controller = c.get('container').resolve<CoursesController>('coursesController');
   return controller.deleteModule(c);
 });
